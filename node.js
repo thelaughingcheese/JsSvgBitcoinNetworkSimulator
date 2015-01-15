@@ -1,6 +1,6 @@
 function Node(_x, _y){
-	this.delay = 5;
-	this.power = 1;
+	this.delay = 30;
+	this.power = 5;
 	this.peers = new Array();
 	this.blocks = new Array();
 	this.blocks.push(genesisBlock);
@@ -90,8 +90,8 @@ Node.prototype.deselect = function(){
 
 Node.prototype.mine = function(generator){
 	for(var i=0;i<this.power;i++){
-		var proof = generator()*1000000000000;
-		if(proof > this.currentBlock.difficulty){
+		var proof = Math.round(generator()*1000000000000);
+		if(proof < this.currentBlock.difficulty){
 			this.createBlock(proof);
 			return;
 		}
@@ -99,7 +99,22 @@ Node.prototype.mine = function(generator){
 }
 
 Node.prototype.createBlock = function(proof){
-	var block = new Block(nextId++,this.currentBlock,proof,time,999000000000,"#00ff00");
+	var difficultyTarget;
+	
+	if((this.currentBlock.depth+1) % adjustmentInterval == 0){
+		var lastAdjustBlock = this.currentBlock;
+		for(var i=1;i<adjustmentInterval;i++){
+			lastAdjustBlock = lastAdjustBlock.prevBlock;
+		}
+		var difficultyTarget = this.currentBlock.difficulty*((time - lastAdjustBlock.timeStamp)/(target*adjustmentInterval));
+		difficultyTarget = Math.max(difficultyTarget,this.currentBlock.difficulty/4);
+		difficultyTarget = Math.min(difficultyTarget,this.currentBlock.difficulty*4);
+	}
+	else{
+		var difficultyTarget = this.currentBlock.difficulty;
+	}
+	
+	var block = new Block(nextId++,this.currentBlock.depth+1,this.currentBlock,proof,time,difficultyTarget,"#00ff00");
 	this.recieveBlock(block,this);
 	this.currentBlock = block;
 }

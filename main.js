@@ -20,6 +20,8 @@ var chainViewTranslater;
 var chainViewX = 100, chainViewY = 100, chainViewXStart = 0; chainViewYStart = 0;
 var chainViewScale = 1.0;
 
+var chainInfo;
+
 var chainConnections;
 var chainNodes;
 
@@ -42,15 +44,16 @@ var packets = new Array();
 var blockNodes = new Array();
 var nextId = 1;
 var time = 0;
-var simulate = true;
+var simulate = false;
 
-var genesisBlock = new Block(0,0,0,0,999000000000, "#00ff00");
+var genesisBlock = new Block(0,0,0,0,0,0000999999999, "#00ff00");
 genesisBlock.prevBlock = genesisBlock
 
 var rng = new Math.seedrandom("seed");
 
-var difficulty = 999000000000;
-var target = 400;
+var difficulty = 000000999999;
+var target = 200;
+var adjustmentInterval = 8;
 
 var activeViewingBlock;
 
@@ -62,8 +65,10 @@ window.onload = function(){
 	viewport = document.getElementById("viewport");
 	viewportScaler = document.getElementById("viewportScale");
 	viewportTranslater = document.getElementById("viewportTranslate");
-	viewportHeight = viewport.scrollHeight;
-	viewportWidth = viewport.clientWidth;
+	//viewportHeight = viewport.scrollHeight;
+	viewportHeight = window.innerHeight;
+	//viewportWidth = viewport.clientWidth;
+	viewportWidth = window.innerWidth;
 	viewportX = viewportWidth/2;
 	viewportY = viewportHeight/2;
 	viewportTranslate.setAttribute("transform","translate("+viewportX+","+viewportY+")");
@@ -77,6 +82,8 @@ window.onload = function(){
 	chainView = document.getElementById("chainView");
 	chainViewScaler = document.getElementById("chainViewScale");
 	chainViewTranslater = document.getElementById("chainViewTranslate");
+	
+	chainInfo = document.getElementById("chainInfo");
 	
 	chainConnections = document.getElementById("chainConnections");
 	chainNodes = document.getElementById("chainNodes");
@@ -117,6 +124,23 @@ window.onload = function(){
 	//---------------
 }
 
+window.onkeypress = function(evt){
+	switch(evt.keyCode){
+		case 113:
+			panClick();
+			break;
+		case 119:
+			moveClick();
+			break;
+		case 101:
+			newClick();
+			break;
+		case 114:
+			connectClick();
+			break;
+	}
+}
+
 /*window.onmousemove = function(event){
 	mouseX = event.clientX;
 	mouseY = event.clientY;
@@ -154,11 +178,37 @@ function tick(){
 }
 
 function startSim(){
-	simulate = true;
+	simulate = !simulate;
+	if(simulate){
+		document.getElementById("startButton").setAttribute("xlink:href","pause.png");
+	}
+	else{
+		document.getElementById("startButton").setAttribute("xlink:href","start.png");
+	}	
 }
 
 function stopSim(){
 	simulate = false;
+	document.getElementById("startButton").setAttribute("xlink:href","start.png");
+	
+	rng = new Math.seedrandom("seed");
+	
+	for(i in nodes){
+		nodes[i].blocks = new Array();
+		nodes[i].blocks.push(genesisBlock);
+		nodes[i].currentBlock = genesisBlock;
+		nodes[i].currentBlockDepth = 0;
+	}
+	
+	for(i in packets){
+		packets[i].remove();
+	}
+	
+	packets = new Array();
+	nextId = 1;
+	time = 0;
+	
+	drawChain(selected);
 }
 
 function delayKeyUp(evt){
@@ -174,15 +224,21 @@ function powerKeyUp(evt){
 }
 
 function panClick(evt){
+	document.getElementById("panButton").setAttribute("xlink:href","panc.png");
+	document.getElementById("moveButton").setAttribute("xlink:href","move.png");
 	mode = 0;
 }
 
 function moveClick(evt){
+	document.getElementById("panButton").setAttribute("xlink:href","pan.png");
+	document.getElementById("moveButton").setAttribute("xlink:href","movec.png");
 	mode = 1;
 	modifier = 0;
 }
 
 function newClick(evt){
+genClick();return;
+
 	var node = new Node(screenToWorldX(650),screenToWorldY(500));
 	nodes.push(node);
 	
@@ -198,6 +254,28 @@ function connectClick(evt){
 		modifier = 0;
 		document.getElementById("connectButton").setAttribute("xlink:href","http://www.eightforums.com/attachments/network-sharing/14091d1357164106t-internet-connection-drops-every-couple-minutes-cable-sxchu-internet.jpg");
 	}
+}
+
+function genClick(){
+	var nodeCount = Math.random() * 80;
+	for(var i=0;i<nodeCount;i++){
+		var node = new Node(parseInt(Math.random()*1000),parseInt(Math.random()*1000));
+		nodes.push(node);
+	}
+	
+	for(var i=0;i<nodes.length;i++){
+		for(var k=0;k<Math.random()*5;k++){
+			nodes[i].addPeer(nodes[parseInt(Math.random()*nodes.length-1)]);
+		}
+	}
+	
+	alert(JSON.stringify(nodes[0]));
+}
+
+function saveClick(){
+}
+
+function loadClick(){
 }
 
 //main viewport
@@ -267,6 +345,9 @@ function chainViewMouseUp(evt){
 }
 
 function chainViewScroll(evt){
+	mouseX = evt.clientX - viewportWidth*0.8;
+	mouseY = evt.clientY;
+
 	if(evt.wheelDelta >= 0){
 		chainViewX -= ((mouseX-chainViewX)*0.2);
 		chainViewY -= ((mouseY-chainViewY)*0.2);

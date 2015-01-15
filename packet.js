@@ -25,8 +25,12 @@ Packet.prototype.update = function(){
 	
 	if(completionRatio >= 1){
 		this.reciever.recieveBlock(this.block, this.sender);
-		packetLayer.removeChild(this.box);
+		this.remove();
 		return 1;
 	}
 	return 0;
+}
+
+Packet.prototype.remove = function(){
+	packetLayer.removeChild(this.box);
 }

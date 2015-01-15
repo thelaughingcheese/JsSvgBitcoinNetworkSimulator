@@ -22,8 +22,30 @@ function BlockNode(_block,_x,_y){
 	
 	this.setPos(_x,_y);
 	
+	var self = this;
+	this.box.addEventListener("mousemove",function(evt){self.mouseMove(evt);},false);
+	this.box.addEventListener("mouseout",function(evt){self.mouseOut(evt);},false);
+	this.label.addEventListener("mousemove",function(evt){self.mouseMove(evt);},false);
+	this.label.addEventListener("mouseout",function(evt){self.mouseOut(evt);},false);
+
 	chainNodes.appendChild(this.box);
 	chainNodes.appendChild(this.label);
+}
+
+BlockNode.prototype.mouseMove = function(evt){
+	mouseX = evt.clientX - viewportWidth*0.8;
+	mouseY = evt.clientY;
+
+	chainInfo.setAttribute("transform","translate("+(mouseX)+","+(mouseY)+")");
+	chainInfo.style.visibility = "visible";
+	
+	document.getElementById("chainInfoId").textContent = "ID: " + this.data.id;
+	document.getElementById("chainInfoProof").textContent = "Proof: " + this.data.proof;
+	document.getElementById("chainInfoDifficulty").textContent = "Difficulty: " + this.data.difficulty;
+}
+
+BlockNode.prototype.mouseOut = function(evt){
+	chainInfo.style.visibility = "hidden";
 }
 
 BlockNode.prototype.setPos = function(_x,_y){
