@@ -45,6 +45,7 @@ var time = 0;
 var simulate = true;
 
 var genesisBlock = new Block(0,0,0,0,999000000000, "#00ff00");
+genesisBlock.prevBlock = genesisBlock
 
 var rng = new Math.seedrandom("seed");
 
@@ -92,6 +93,9 @@ window.onload = function(){
 	var newButton = document.getElementById("newButton");
 	var connectButton = document.getElementById("connectButton");
 	
+	var startButton = document.getElementById("startButton");
+	var stopButton = document.getElementById("stopButton");
+	
 	var delayInput = document.getElementById("delayInput");
 	var powerInput = document.getElementById("powerInput");
 	
@@ -99,6 +103,9 @@ window.onload = function(){
 	moveButton.addEventListener("mouseup", moveClick, false);
 	newButton.addEventListener("mouseup", newClick, false);
 	connectButton.addEventListener("mouseup", connectClick, false);
+	
+	startButton.addEventListener("mouseup", startSim, false);
+	stopButton.addEventListener("mouseup", stopSim, false);
 	
 	delayInput.addEventListener("keyup", delayKeyUp, false);
 	powerInput.addEventListener("keyup", powerKeyUp, false);
@@ -144,6 +151,14 @@ function tick(){
 	}
 	
 	time++;
+}
+
+function startSim(){
+	simulate = true;
+}
+
+function stopSim(){
+	simulate = false;
 }
 
 function delayKeyUp(evt){
@@ -295,7 +310,7 @@ function drawChain(node){
 	
 	for(var i=1;i<node.blocks.length;i++){
 		var blockNode = new BlockNode(node.blocks[i],0,0);
-		var prevBlockNode = getBlockNode(node.blocks[i].prevBlockId);
+		var prevBlockNode = getBlockNode(node.blocks[i].prevBlock);
 		
 		blockNodes.push(blockNode);
 		prevBlockNode.addChild(blockNode);
@@ -304,13 +319,13 @@ function drawChain(node){
 
 function extendChain(block,node){
 	var blockNode = new BlockNode(block,0,0);
-	var prevBlockNode = getBlockNode(block.prevBlockId);
+	var prevBlockNode = getBlockNode(block.prevBlock);
 	
 	if(prevBlockNode == null){
-		extendChain(node.getBlock(block.prevBlockId),node);
+		extendChain(block.prevBlock,node);
 	}
 	
-	prevBlockNode = getBlockNode(block.prevBlockId);
+	prevBlockNode = getBlockNode(block.prevBlock);
 
 	blockNodes.push(blockNode);
 	prevBlockNode.addChild(blockNode);
@@ -318,9 +333,9 @@ function extendChain(block,node){
 
 //util
 
-function getBlockNode(id){
+function getBlockNode(block){
 	for(i in blockNodes){
-		if(blockNodes[blockNodes.length - 1 - i].data.id == id){
+		if(blockNodes[blockNodes.length - 1 - i].data == block){
 			return blockNodes[blockNodes.length - 1 - i];
 		}
 	}

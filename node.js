@@ -1,10 +1,10 @@
 function Node(_x, _y){
-	this.delay = 10;
+	this.delay = 5;
 	this.power = 1;
 	this.peers = new Array();
 	this.blocks = new Array();
 	this.blocks.push(genesisBlock);
-	this.currentBlock = 0;
+	this.currentBlock = genesisBlock;
 	this.currentBlockDepth = 0;
 	
 	this.connections = new Array();
@@ -91,7 +91,7 @@ Node.prototype.deselect = function(){
 Node.prototype.mine = function(generator){
 	for(var i=0;i<this.power;i++){
 		var proof = generator()*1000000000000;
-		if(proof > difficulty){
+		if(proof > this.currentBlock.difficulty){
 			this.createBlock(proof);
 			return;
 		}
@@ -101,7 +101,7 @@ Node.prototype.mine = function(generator){
 Node.prototype.createBlock = function(proof){
 	var block = new Block(nextId++,this.currentBlock,proof,time,999000000000,"#00ff00");
 	this.recieveBlock(block,this);
-	this.currentBlock = block.id;
+	this.currentBlock = block;
 }
 
 Node.prototype.addPeer = function(peer){
@@ -135,13 +135,12 @@ Node.prototype.isPeer = function(peer){
 }
 
 Node.prototype.recieveBlock = function(block, sender){
-	
 	if(this.hasBlock(block)){
 		return;	
 	}
 	
-	if(!this.hasBlockId(block.prevBlockId)){
-		this.requestBlock(block.prevBlockId,sender);
+	if(!this.hasBlock(block.prevBlock)){
+		this.requestBlock(block.prevBlock.id,sender);
 	}
 	this.blocks.push(block);
 	
@@ -158,7 +157,7 @@ Node.prototype.recieveBlock = function(block, sender){
 	//change curently mining block
 	var depth = this.getBlockDepth(block);
 	if(depth > this.currentBlockDepth){
-		this.currentBlock = block.id;
+		this.currentBlock = block;
 		this.currentBlockDepth = depth;
 	}
 }
@@ -172,26 +171,17 @@ Node.prototype.hasBlock = function(block){
 	return false;
 }
 
-Node.prototype.hasBlockId = function(block){
-	for(i in this.blocks){
-		if(this.blocks[this.blocks.length - 1 - i].id == block){
-			return true;
-		}
-	}
-	return false;
-}
-
-Node.prototype.requestBlock = function(block,sender){
-	var newBlock = sender.getBlock(block);
-	if(!this.hasBlockId(newBlock.prevBlockId)){
-		this.requestBlock(newBlock.prevBlockId,sender);
+Node.prototype.requestBlock = function(blockId,sender){
+	var newBlock = sender.getBlock(blockId);
+	if(!this.hasBlock(newBlock.prevBlock)){
+		this.requestBlock(newBlock.prevBlock.id,sender);
 	}
 	this.blocks.push(newBlock);
 }
 
-Node.prototype.getBlock = function(block){
+Node.prototype.getBlock = function(blockId){
 	for(i in this.blocks){
-		if(this.blocks[this.blocks.length - 1 - i].id == block){
+		if(this.blocks[this.blocks.length - 1 - i].id == blockId){
 			return this.blocks[this.blocks.length - 1 - i];
 		}
 	}
@@ -203,7 +193,7 @@ Node.prototype.getBlockDepth = function(block){
 	
 	var checkBlock = block;
 	while(checkBlock.id != 0){
-		checkBlock = this.getBlock(checkBlock.prevBlockId);
+		checkBlock = checkBlock.prevBlock;
 		depth++;
 	}
 	
