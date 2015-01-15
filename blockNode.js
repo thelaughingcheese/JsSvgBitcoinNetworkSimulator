@@ -37,7 +37,7 @@ BlockNode.prototype.mouseMove = function(evt){
 	mouseY = evt.clientY;
 
 	chainInfo.setAttribute("transform","translate("+(mouseX)+","+(mouseY)+")");
-	chainInfo.style.visibility = "visible";
+	chainInfo.style.display = "inline";
 	
 	document.getElementById("chainInfoId").textContent = "ID: " + this.data.id;
 	document.getElementById("chainInfoProof").textContent = "Proof: " + this.data.proof;
@@ -45,7 +45,7 @@ BlockNode.prototype.mouseMove = function(evt){
 }
 
 BlockNode.prototype.mouseOut = function(evt){
-	chainInfo.style.visibility = "hidden";
+	chainInfo.style.display = "none";
 }
 
 BlockNode.prototype.setPos = function(_x,_y){
@@ -120,6 +120,5 @@ BlockNode.prototype.resize = function(){
 		this.parent.resize();
 	}
 	
-	//alert(this.data.id);
 	//console.log(blockNodes);
 }

@@ -25,6 +25,13 @@ var chainInfo;
 var chainConnections;
 var chainNodes;
 
+var overlay;
+var saver;
+var saverContents;
+var loaderContents;
+var helpButton;
+var helpClose;
+
 /*--- mode ---
 0 - pan/select
 1 - move
@@ -46,12 +53,12 @@ var nextId = 1;
 var time = 0;
 var simulate = false;
 
-var genesisBlock = new Block(0,0,0,0,0,0000999999999, "#00ff00");
+var genesisBlock = new Block(0,0,0,0,0,999999999, "#00ff00");
 genesisBlock.prevBlock = genesisBlock
 
 var rng = new Math.seedrandom("seed");
 
-var difficulty = 000000999999;
+var difficulty = 999999;
 var target = 200;
 var adjustmentInterval = 8;
 
@@ -98,21 +105,43 @@ window.onload = function(){
 	var panButton = document.getElementById("panButton");
 	var moveButton = document.getElementById("moveButton");
 	var newButton = document.getElementById("newButton");
+	var newRandomButton = document.getElementById("newRandomButton");
 	var connectButton = document.getElementById("connectButton");
 	
 	var startButton = document.getElementById("startButton");
 	var stopButton = document.getElementById("stopButton");
+	var saveButton = document.getElementById("saveButton");
+	var loadButton = document.getElementById("loadButton");
 	
 	var delayInput = document.getElementById("delayInput");
 	var powerInput = document.getElementById("powerInput");
 	
+	var saverClose = document.getElementById("saverClose");
+	var loaderClose = document.getElementById("loaderClose");
+	var loaderLoad = document.getElementById("loaderLoad");
+	
+	overlay = document.getElementById("overlay");
+	saver = document.getElementById("saver");
+	saverContents = document.getElementById("saverContents");
+	loaderContents = document.getElementById("loaderContents");
+	helpButton = document.getElementById("helpButton");
+	helpClose = document.getElementById("helpClose");
+	
 	panButton.addEventListener("mouseup", panClick, false);
 	moveButton.addEventListener("mouseup", moveClick, false);
 	newButton.addEventListener("mouseup", newClick, false);
+	newRandomButton.addEventListener("mouseup", genClick, false);
 	connectButton.addEventListener("mouseup", connectClick, false);
 	
 	startButton.addEventListener("mouseup", startSim, false);
 	stopButton.addEventListener("mouseup", stopSim, false);
+	saveButton.addEventListener("mouseup", saveClick, false);
+	loadButton.addEventListener("mouseup", loadClick, false);
+	saverClose.addEventListener("mouseup", saveCloseClick, false);
+	loaderClose.addEventListener("mouseup", loadCloseClick, false);
+	loaderLoad.addEventListener("mouseup", loadLoadClick, false);
+	helpButton.addEventListener("mouseup", helpClick, false);
+	helpClose.addEventListener("mouseup", helpCloseClick, false);
 	
 	delayInput.addEventListener("keyup", delayKeyUp, false);
 	powerInput.addEventListener("keyup", powerKeyUp, false);
@@ -124,7 +153,7 @@ window.onload = function(){
 	//---------------
 }
 
-window.onkeypress = function(evt){
+function keyPress(evt){
 	switch(evt.keyCode){
 		case 113:
 			panClick();
@@ -136,6 +165,9 @@ window.onkeypress = function(evt){
 			newClick();
 			break;
 		case 114:
+			genClick();
+			break;
+		case 116:
 			connectClick();
 			break;
 	}
@@ -237,29 +269,25 @@ function moveClick(evt){
 }
 
 function newClick(evt){
-genClick();return;
-
-	var node = new Node(screenToWorldX(650),screenToWorldY(500));
+	var node = new Node(screenToWorldX(650),screenToWorldY(500), nodes.length);
 	nodes.push(node);
-	
-	//drawChain(node);
 }
 
 function connectClick(evt){
 	if(mode == 0 && selected != null && modifier == 0){
 		modifier = 1;
-		document.getElementById("connectButton").setAttribute("xlink:href","http://bc-injury-law.com/blog/wp-content/uploads/bc-injury-law-real-and-substantial-connection1.jpg");
+		document.getElementById("connectButton").setAttribute("xlink:href","connectc.png");
 	}
 	else{
 		modifier = 0;
-		document.getElementById("connectButton").setAttribute("xlink:href","http://www.eightforums.com/attachments/network-sharing/14091d1357164106t-internet-connection-drops-every-couple-minutes-cable-sxchu-internet.jpg");
+		document.getElementById("connectButton").setAttribute("xlink:href","connect.png");
 	}
 }
 
 function genClick(){
 	var nodeCount = Math.random() * 80;
 	for(var i=0;i<nodeCount;i++){
-		var node = new Node(parseInt(Math.random()*1000),parseInt(Math.random()*1000));
+		var node = new Node(parseInt(Math.random()*1000),parseInt(Math.random()*1000),nodes.length);
 		nodes.push(node);
 	}
 	
@@ -268,14 +296,42 @@ function genClick(){
 			nodes[i].addPeer(nodes[parseInt(Math.random()*nodes.length-1)]);
 		}
 	}
-	
-	alert(JSON.stringify(nodes[0]));
 }
 
 function saveClick(){
+	overlay.style.display = "inline";
+	saver.style.display = "inline";
+	saverContents.innerHTML = getExportNodes();
+}
+
+function saveCloseClick(){
+	overlay.style.display = "none";
+	saver.style.display = "none";
 }
 
 function loadClick(){
+	overlay.style.display = "inline";
+	loader.style.display = "inline";
+}
+
+function loadCloseClick(){
+	overlay.style.display = "none";
+	loader.style.display = "none";
+}
+
+function loadLoadClick(){
+	clearNodes();
+	importNodes(loaderContents.value);
+}
+
+function helpClick(){
+	overlay.style.display = "inline";
+	help.style.display = "inline";
+}
+
+function helpCloseClick(){
+	overlay.style.display = "none";
+	help.style.display = "none";
 }
 
 //main viewport
@@ -428,4 +484,56 @@ function screenToWorldX(_x){
 
 function screenToWorldY(_y){
 	return (_y - viewportY)/viewportScale;
+}
+
+function getExportNodes(){
+	var nodesExport = new Array();
+	for(var i=0;i<nodes.length;i++){
+		nodesExport.push(new NodeExport(nodes[i].id, nodes[i].x,nodes[i].y,nodes[i].delay,nodes[i].power,nodes[i].peers));
+	}
+	return JSON.stringify(nodesExport);
+}
+
+function clearNodes(){
+	stopSim();
+	while(0<nodes.length){
+		nodes[0].remove();
+		nodes.splice(0,1);
+	}
+}
+
+function importNodes(JSONString){
+	var importedNodes;
+	try{
+		importedNodes = JSON.parse(JSONString);
+	}
+	catch(err){
+		alert("invalid JSON");
+	}
+	
+	for(i in importedNodes){
+		if(importedNodes[i].id == null ||
+		importedNodes[i].x == null || 
+		importedNodes[i].y == null ||
+		importedNodes[i].delay == null ||
+		importedNodes[i].power == null ||
+		importedNodes[i].peers == null){
+			clearNodes()
+			alert("invalid node data");
+			return;
+		}
+		nodes.push(new Node(importedNodes[i].x,importedNodes[i].y,importedNodes[i].id));
+	}
+		
+	for(i in importedNodes){
+		for(var k=0;k<importedNodes[i].peers.length;k++){
+			if(importedNodes[i].peers[k] >= importedNodes.length || importedNodes[i].peers[k] < 0){
+				clearNodes()
+				alert("invalid node data");
+				return;
+			}
+			nodes[importedNodes[i].id].addPeer(	nodes[importedNodes[i].peers[k]]);
+		}
+	}
+
 }

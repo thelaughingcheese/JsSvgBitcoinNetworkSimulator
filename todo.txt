@@ -1,11 +1,6 @@
 make play pause reset EVERYHTING
-difficulty adjustment
+global difficulty adjustment
 keyboard shortcuts
-
-generate random network
-save nodes to file
-load nodes from file
-transfer object format
 
 optimize tree drawing
 network characteristics and statistics

@@ -3,9 +3,14 @@
 <script src="packet.js"></script>
 <script src="connection.js"></script>
 <script src="node.js"></script>
+<script src="nodeExport.js"></script>
 <script src="blockNode.js"></script>
 <script src="main.js"></script>
-<body style="margin:0;">
+
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+<body style="margin:0;" onkeypress="return keyPress(event);">
 
 <svg id="viewport" xmlns="http://www.w3.org/2000/svg" version="1.1" style="position:absolute;height:100%;width:100%;margin:0;padding:0;z-index:0;">
     <g id="viewportTranslate" transform="translate(0,0)">
@@ -37,7 +42,7 @@
     </g>
     </g>
 	
-	<g id="chainInfo" transform="translate(100,100)" style="visibility:hidden;">
+	<g id="chainInfo" transform="translate(100,100)" style="display:none;">
 		<rect x="0" y="0" width="200" height="100" stroke="black" rx="6"  stroke-width="1" fill="white" />
 		<text x="8" y="30" id="chainInfoId">ID: </text>
 		<text x="8" y="50" id="chainInfoProof">Proof: </text>
@@ -49,14 +54,18 @@
 	<g id="modes">
 		<image id="panButton" width=50 height=50 xlink:href="panc.png"/></image>
     	<image id="moveButton" x=50 width=50 height=50 xlink:href="move.png"/></image>
-    	<image id="newButton" x=100 width=50 height=50 xlink:href="http://www.languages.ac.nz/wp-content/uploads/2013/10/new.jpg"/></image>
+    	<image id="newButton" x=100 width=50 height=50 xlink:href="new.png"/></image>
+		<image id="newRandomButton" x=150 width=50 height=50 xlink:href="random.png"/></image>
     </g>
     <g id="modify">
-    	<image id="connectButton" x=150 width=50 height=50 xlink:href="http://www.eightforums.com/attachments/network-sharing/14091d1357164106t-internet-connection-drops-every-couple-minutes-cable-sxchu-internet.jpg"/></image>
+    	<image id="connectButton" x=200 width=50 height=50 xlink:href="connect.png"/></image>
     </g>
 	<g id="control">
-		<image id="startButton" x=200 width=50 height=50 xlink:href="start.png"/></image>
-		<image id="stopButton" x=250 width=50 height=50 xlink:href="stop.png"/></image>
+		<image id="startButton" x=250 width=50 height=50 xlink:href="start.png"/></image>
+		<image id="stopButton" x=300 width=50 height=50 xlink:href="stop.png"/></image>
+		<image id="saveButton" x=350 width=50 height=50 xlink:href="save.png"/></image>
+		<image id="loadButton" x=400 width=50 height=50 xlink:href="load.png"/></image>
+		<image id="helpButton" x=450 width=50 height=50 xlink:href="help.png"/></image>
 	</g>
 </svg>
 
@@ -64,5 +73,41 @@
 	Delay: <input id="delayInput"/><br>
     Power: <input id="powerInput"/><br>
 </div>
+
+<div id="overlay" style="position:fixed;background-color:black;height:100%;width:100%;opacity:0.5;display:none;">
+</div>
+
+<div id="saver" style="position:fixed;background-color:white;height:70%;width:80%;left:10%;top:15%;display:none;">
+	<div id="saverClose" style="position:absolute;top:10px;right:15px;">Close</div>
+	<div id="saverContents" style="position:absolute;top:10%;height:81%;left:3%;width:90%;overflow:auto;padding:2%;"></div>
+</div>
+
+<div id="loader" style="position:fixed;background-color:white;height:70%;width:80%;left:10%;top:15%;display:none;">
+	<div id="loaderClose" style="position:absolute;top:10px;right:15px;">Close</div>
+	<div id="loaderLoad" style="position:absolute;bottom:10px;right:15px;">Load</div>
+	<textarea id="loaderContents" style="position:absolute;top:10%;height:82%;left:3%;width:94%;resize:none;padding:2%;"></textarea>
+</div>
+
+<div id="help" style="position:fixed;background-color:white;height:70%;width:80%;left:8%;top:15%;padding:2%;display:none;">
+	<div id="helpClose" style="position:absolute;top:10px;right:15px;">Close</div>
+	<p>
+		The Buttons at the top listed from left to right are as follows: <br><br>
+		Pan/Select Node (Scroll to zoom)<br>
+		Move node<br>
+		Create node<br>
+		Create and connect random number of nodes<br>
+		Connect selected node to another (must have a selected node)<br>
+		Run/pause simulation<br>
+		Stop simulation<br>
+		Export node network to text<br>
+		Load node network from text<br>
+		Help<br>
+		<br>
+		<br>
+		Delay specifies the network delay of that node, the sum of the delay of 2 nodes is the amount of ticks required for a packet to go from one to the other<br>
+		Power is the hashing power of the node, the higher it is, the quicker it can generate a block<br>
+		A Tick is a time unit in the simulation, currently 20ms<br>
+	</p>
+</div>-
 
 </body>

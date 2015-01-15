@@ -1,4 +1,7 @@
-function Node(_x, _y){
+function Node(_x, _y, _id){
+	this.id = _id;
+	this.x = _x;
+	this.y = _y;
 	this.delay = 30;
 	this.power = 5;
 	this.peers = new Array();
@@ -120,12 +123,14 @@ Node.prototype.createBlock = function(proof){
 }
 
 Node.prototype.addPeer = function(peer){
-	this.peers.push(peer);
-	peer.peers.push(this);
-	
-	var connect = new Connection(this,peer);
-	this.connections.push(connect);
-	peer.connections.push(connect);
+	if(this.isPeer(peer) == -1){
+		this.peers.push(peer);
+		peer.peers.push(this);
+		
+		var connect = new Connection(this,peer);
+		this.connections.push(connect);
+		peer.connections.push(connect);
+	}
 }
 
 Node.prototype.removePeer = function(index){
@@ -216,7 +221,16 @@ Node.prototype.getBlockDepth = function(block){
 }
 
 Node.prototype.setPos = function(_x, _y){
+	this.x = _x;
+	this.y = _y;
 	this.box.setAttribute("x",_x);
 	this.box.setAttribute("y",_y);
 	this.update();
+}
+
+Node.prototype.remove = function(){
+	while(0<this.peers.length){
+		this.removePeer(0);
+	}
+	nodeLayer.removeChild(this.box);
 }
