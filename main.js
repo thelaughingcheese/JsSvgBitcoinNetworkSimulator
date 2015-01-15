@@ -41,8 +41,10 @@ var nodes = new Array();
 var packets = new Array();
 var blockNodes = new Array();
 var nextId = 1;
+var time = 0;
+var simulate = true;
 
-var genesisBlock = new Block(0,0,0);
+var genesisBlock = new Block(0,0,0,0,999000000000, "#00ff00");
 
 var rng = new Math.seedrandom("seed");
 
@@ -125,6 +127,10 @@ window.onload = function(){
 }*/
 
 function tick(){
+	if(!simulate){
+		return;
+	}
+	
 	//mine blocks
 	for(i in nodes){
 		nodes[i].mine(rng);
@@ -136,6 +142,8 @@ function tick(){
 			i--;
 		}
 	}
+	
+	time++;
 }
 
 function delayKeyUp(evt){
@@ -312,8 +320,8 @@ function extendChain(block,node){
 
 function getBlockNode(id){
 	for(i in blockNodes){
-		if(blockNodes[i].data.id == id){
-			return blockNodes[i];
+		if(blockNodes[blockNodes.length - 1 - i].data.id == id){
+			return blockNodes[blockNodes.length - 1 - i];
 		}
 	}
 }

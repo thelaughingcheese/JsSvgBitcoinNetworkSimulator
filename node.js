@@ -99,7 +99,7 @@ Node.prototype.mine = function(generator){
 }
 
 Node.prototype.createBlock = function(proof){
-	var block = new Block(nextId++,this.currentBlock,proof);
+	var block = new Block(nextId++,this.currentBlock,proof,time,999000000000,"#00ff00");
 	this.recieveBlock(block,this);
 	this.currentBlock = block.id;
 }
