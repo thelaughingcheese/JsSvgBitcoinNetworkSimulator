@@ -1,0 +1,57 @@
+<script src="seedrandom.js"></script>
+<script src="block.js"></script>
+<script src="packet.js"></script>
+<script src="connection.js"></script>
+<script src="node.js"></script>
+<script src="blockNode.js"></script>
+<script src="main.js"></script>
+<body style="margin:0;">
+
+<svg id="viewport" xmlns="http://www.w3.org/2000/svg" version="1.1" style="position:absolute;height:100%;width:100%;margin:0;padding:0;z-index:0;">
+    <g id="viewportTranslate" transform="translate(0,0)">
+    <g id="viewportScale" transform="scale(1)">
+    	<g id="connections">
+        </g>
+        
+        <g id="packets">
+        </g>
+        
+        <g id="nodes">
+        </g>
+ 		<!--<rect id="boxy" x="0" width="50" height="50" stroke="black" rx="20"  stroke-width="1" fill="red" />
+		<line x1="0" y1="0" x2="200" y2="200" stroke="black" stroke-with="2"/>
+		<path d="M100,100 c60,0 40,100 100,100" stroke="black" fill="none"/>-->
+    </g>
+    </g>
+</svg>
+
+<svg id="chainView" xmlns="http://www.w3.org/2000/svg" version="1.1" style="position:absolute;margin:0;padding:0;width:20%;height:100%;right:0;background-color:white;border-left:solid;border-width:1px;">
+	<g id="chainViewTranslate" transform="translate(100,100)">
+    <g id="chainViewScale" transform="scale(1)">
+    	<g id="chainConnections">
+        </g>
+        
+        <g id="chainNodes">
+        	<!--<rect id="boxy" x="0" width="50" height="50" stroke="black" rx="20"  stroke-width="1" fill="red" />-->
+        </g>
+    </g>
+    </g>
+</svg>
+
+<svg id="ui" xmlns="http://www.w3.org/2000/svg" version="1.1" style="position:fixed;width:100%;height:50;border-style:solid;border-width:1px;background-color:white;">
+	<g id="modes">
+		<image id="panButton" width=50 height=50 xlink:href="http://www.avtotools.com/pd_info/tis2000/cosids/Docu/Images/WD_Abb10.gif"/></image>
+    	<image id="moveButton" x=50 width=50 height=50 xlink:href="http://www.avtotools.com/pd_info/tis2000/cosids/Docu/Images/WD_Abb10.gif"/></image>
+    	<image id="newButton" x=100 width=50 height=50 xlink:href="http://www.languages.ac.nz/wp-content/uploads/2013/10/new.jpg"/></image>
+    </g>
+    <g id="modify">
+    	<image id="connectButton" x=150 width=50 height=50 xlink:href="http://www.eightforums.com/attachments/network-sharing/14091d1357164106t-internet-connection-drops-every-couple-minutes-cable-sxchu-internet.jpg"/></image>
+    </g>
+</svg>
+
+<div style="position:fixed;top:60px;">
+	Delay: <input id="delayInput"/><br>
+    Power: <input id="powerInput"/><br>
+</div>
+
+</body>
